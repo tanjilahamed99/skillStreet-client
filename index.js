@@ -37,7 +37,7 @@ async function run() {
 
         const noteCollection = client.db("notePad").collection("note");
 
-        app.get('/node', async (req, res) => {
+        app.get('/note', async (req, res) => {
             const result = await noteCollection.find().toArray()
             res.send(result)
         })
@@ -52,6 +52,7 @@ async function run() {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await noteCollection.deleteOne(query)
+            res.send(result)
         })
 
         app.patch('/updateNote/:id', async (req, res) => {
@@ -70,16 +71,17 @@ async function run() {
         })
 
 
-        app.patch('/trash', async (req, res) => {
+        app.patch('/trash/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id:new ObjectId(id)}
-            const updateDoc={
-                $set:{
-
+            const query = { _id: new ObjectId(id) }
+            const update = req.body
+            const updateDoc = {
+                $set: {
+                    trash: update.trash
                 }
             }
-            const result = await noteCollection.updateOne(query,updateDoc)
-
+            const result = await noteCollection.updateOne(query, updateDoc)
+            res.send(result)
         })
 
 
