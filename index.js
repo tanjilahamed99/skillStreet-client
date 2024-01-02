@@ -42,6 +42,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/note/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await noteCollection.findOne(query)
+            res.send(result)
+        })
+
         app.post('/createNote', async (req, res) => {
             const newNote = req.body
             const result = await noteCollection.insertOne(newNote)
@@ -61,7 +68,9 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const updateDoc = {
                 $set: {
-
+                    title: updateNote.title,
+                    content: updateNote.content,
+                    date: updateNote.date,
                 }
             }
 
@@ -98,7 +107,18 @@ run().catch(console.dir);
 
 
 
+app.all('*', (req, res, next) => {
+    const error = new Error(`${req.url} not a valid url`)
+    error.status = 401
+    next(error)
 
+})
+
+app.use((err,req,res,next)=>{
+    res.status(err.status || 500).json({
+        message: err.message
+    })
+})
 
 app.listen(port, () => {
     console.log(`app running on port ${port}`)
